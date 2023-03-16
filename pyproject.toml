@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ponzu"
+name = "ponzu-bot"
 version = "0.1.0"
 description = ""
 authors = ["KiyotakaMatsushita <kiyotaka.86@gmail.com>"]
@@ -8,15 +8,13 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.9"
 openai = "^0.27.2"
+boto3 = "^1.26.92"
 slack-bolt = "^1.16.4"
-asyncio = "^3.4.3"
+Flask = "^2.2.3"
+python-dotenv = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
-python-dotenv = "^1.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-ponzu = "ponzu.server:main"
