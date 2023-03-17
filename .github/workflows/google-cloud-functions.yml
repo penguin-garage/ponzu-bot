@@ -37,4 +37,4 @@ jobs:
         name: ponzu_bolt_app
         region: asia-northeast1
         runtime: python39 
-        env_vars: SLACK_BOT_TOKEN=${{secrets.SLACK_BOT_TOKEN}},SLACK_APP_TOKEN=${{secrets.SLACK_APP_TOKEN}},OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}}
+        env_vars: SLACK_BOT_TOKEN=${{secrets.SLACK_BOT_TOKEN}},SLACK_APP_TOKEN=${{secrets.SLACK_APP_TOKEN}},SLACK_SIGNING_SECRET=${{secrets.SLACK_SIGNING_SECRET}},OPENAI_API_KEY=${{secrets.OPENAI_API_KEY}}
