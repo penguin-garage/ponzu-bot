@@ -12,6 +12,7 @@ boto3 = "^1.26.92"
 slack-bolt = "^1.16.4"
 Flask = "^2.2.3"
 python-dotenv = "^1.0.0"
+glom = "^23.1.1"
 
 [tool.poetry.dev-dependencies]
 

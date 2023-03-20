@@ -2,6 +2,8 @@
 import os
 import openai
 from ponzu_bot.config import INITIAL_PROMPT
+from glom import glom
+
 
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
@@ -35,13 +37,38 @@ DEFAULT_INITIAL_PROMPT = """あなたはChatbotとして、ペンギンガレー
 if not INITIAL_PROMPT:
     INITIAL_PROMPT = DEFAULT_INITIAL_PROMPT
 
-def generate_reply(prompt):
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": INITIAL_PROMPT},
-            {"role": "user", "content": prompt},
-        ]
-    )
+chat_history = {}
 
-    return response.choices[0].message.content
+class Chatbot():
+    PRESET_MESSAGES = [
+        {"role": "system", "content": INITIAL_PROMPT},
+    ]
+
+    def __init__(self, user_id: str, temperature: float = 0.5):
+        self.user_id = user_id
+        self.temperature = temperature
+        self.messages = glom(chat_history, user_id, default=self.PRESET_MESSAGES)
+
+    def chat(self, message):
+        self.add_user_message(message)
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=self.messages,
+            temperature=self.temperature,
+        )
+        reply = glom(response, "choices.0.message.content", default=None)
+        self.add_assistant_message(reply)
+        return reply
+
+    def add_user_message(self, message):
+        self.messages.append({"role": "user", "content": message})
+        chat_history[self.user_id] = self.messages
+
+    def add_assistant_message(self, message):
+        self.messages.append({"role": "assistant", "content": message})
+        chat_history[self.user_id] = self.messages
+
+# For local development
+if __name__ == "__main__":
+    Chatbot(user_id="test").chat("こんにちは、僕の名前は諭吉です。")
+    Chatbot(user_id="test").chat("僕の名前は何でしょうか？")

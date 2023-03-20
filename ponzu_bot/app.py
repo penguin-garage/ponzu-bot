@@ -1,7 +1,7 @@
 from slack_bolt import App
 from ponzu_bot.config import SLACK_BOT_TOKEN
 from ponzu_bot.logger import logger
-from ponzu_bot.chatter import generate_reply
+from ponzu_bot.chatter import Chatbot
 
 app = App(token=SLACK_BOT_TOKEN)
 
@@ -11,15 +11,13 @@ def command_handler(body, say):
     Handle mention events in the Slack chat
     """
     text = body['event']['text']
-    user = body['event']['user']
-    logger.info(f"Received message from {user}: {text}")
+    user_id = body['event']['user']
+    logger.info(f"Received message from {user_id}: {text}")
 
-    # GPT-3.5-turboを使って返信を生成
-    reply = generate_reply(text)
+    reply = Chatbot(user_id=user_id).chat(text)
     logger.info(f"Generated reply: {reply}")
 
-    # 返信を送信
-    say(f"<@{user}> {reply}")
+    say(f"<@{user_id}>\n{reply}")
 
 @app.event("message")
 def message_channel(body, say, logger):
