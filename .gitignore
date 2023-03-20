@@ -163,4 +163,3 @@ node_modules/
 .serverless/
 gha-creds-*.json
 .env.yaml
-requirements.txt
