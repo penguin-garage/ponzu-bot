@@ -12,12 +12,17 @@ def command_handler(body, say):
     """
     text = body['event']['text']
     user_id = body['event']['user']
+    thread_ts = body['event']['ts']
+
     logger.info(f"Received message from {user_id}: {text}")
 
     reply = Chatbot(user_id=user_id).chat(text)
     logger.info(f"Generated reply: {reply}")
 
-    say(f"<@{user_id}>\n{reply}")
+    say({
+        "thread_ts": thread_ts,
+        "text": f"{reply}"
+    })
 
 @app.event("message")
 def message_channel(body, say, logger):

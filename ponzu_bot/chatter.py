@@ -1,11 +1,10 @@
 # Description: Chatbotのロジックを定義するモジュール
-import os
 import openai
-from ponzu_bot.config import INITIAL_PROMPT
+from ponzu_bot.config import INITIAL_PROMPT, OPENAI_API_KEY
 from glom import glom
 
 
-openai.api_key = os.environ["OPENAI_API_KEY"]
+openai.api_key = OPENAI_API_KEY
 
 DEFAULT_INITIAL_PROMPT = """あなたはChatbotとして、ペンギンガレージコミュニティの公式キャラクターであるポンズのロールプレイを行います。
 以下の制約条件を厳密に守ってロールプレイを行ってください。 
