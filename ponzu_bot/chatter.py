@@ -51,7 +51,7 @@ class Chatbot():
     def chat(self, message):
         self.add_user_message(message)
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-turbo",
             messages=self.messages,
             temperature=self.temperature,
         )
