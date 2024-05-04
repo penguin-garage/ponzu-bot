@@ -7,13 +7,16 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-openai = "^0.27.2"
+openai = "^1.25.1"
 boto3 = "^1.26.92"
 slack-bolt = "^1.16.4"
 Flask = "^2.2.3"
 python-dotenv = "^1.0.0"
 glom = "^23.1.1"
 langchain = "^0.1.17"
+langgraph = "^0.0.44"
+llama-index = "^0.10.34"
+langchain-openai = "^0.1.6"
 
 [tool.poetry.dev-dependencies]
 
