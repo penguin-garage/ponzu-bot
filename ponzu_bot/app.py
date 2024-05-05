@@ -66,5 +66,11 @@ def handle_help_command(ack, say):
 def message_channel(body, say, logger):
     logger.info(body)
 
+
+@app.middleware
+def skip_retry(logger, request, next):
+    if "x-slack-retry-num" not in request.headers:
+        next()
+
 if __name__ == "__main__":
     SocketModeHandler(app, SLACK_APP_TOKEN).start()
