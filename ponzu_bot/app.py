@@ -42,8 +42,6 @@ def handle_search_command(ack, say, command):
     search_query = command['text']
     logger.info("検索クエリを受け取りました: %s", search_query)
 
-    # ここでNotion APIを使用してペンギンのページから情報を検索するロジックを実装します
-    # 仮の応答メッセージを設定
     search_results = qa_bot(search_query)
 
     say({
