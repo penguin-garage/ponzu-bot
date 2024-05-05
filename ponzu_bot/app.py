@@ -2,7 +2,7 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 from ponzu_bot.config import SLACK_BOT_TOKEN, SLACK_APP_TOKEN
 from ponzu_bot.logger import logger
-from ponzu_bot.chatter import Chatbot
+# from ponzu_bot.chatter import Chatbot
 from ponzu_bot.qa import qa_bot
 from ponzu_bot.agent import ponzu_bot_agent
 from langchain_core.messages import HumanMessage
