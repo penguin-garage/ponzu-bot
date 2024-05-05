@@ -56,10 +56,10 @@ query_engine = RetrieverQueryEngine(
 class SearchInput(BaseModel):
     query: str = Field(description="should be a search query")
 
-@tool(args_schema=SearchInput, return_direct=True)
+@tool(args_schema=SearchInput)
 def penguin_vector_search(query: str) -> str:
     """
-    Search the documents using the penguin garage community vector index and return the result
+    Search for information in the penguin wiki
     """
     result=query_engine.query(query)
     return result

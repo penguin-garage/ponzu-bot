@@ -4,6 +4,9 @@ from ponzu_bot.config import SLACK_BOT_TOKEN, SLACK_APP_TOKEN
 from ponzu_bot.logger import logger
 from ponzu_bot.chatter import Chatbot
 from ponzu_bot.qa import qa_bot
+from ponzu_bot.agent import ponzu_bot_agent
+from langchain_core.messages import HumanMessage
+
 
 app = App(token=SLACK_BOT_TOKEN)
 
@@ -18,12 +21,16 @@ def command_handler(body, say):
 
     logger.info(f"Received message from {user_id}: {text}")
 
-    reply = Chatbot(user_id=user_id).chat(text)
+    agent = ponzu_bot_agent()
+    reply = agent.invoke({"messages":[HumanMessage(content=text)]})
+    output = reply["output"]
+
+    # reply = Chatbot(user_id=user_id).chat(text)
     logger.info(f"Generated reply: {reply}")
 
     say({
         "thread_ts": thread_ts,
-        "text": f"{reply}"
+        "text": f"{output}"
     })
 
 @app.command("/qa")
