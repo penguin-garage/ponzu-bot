@@ -71,14 +71,12 @@ ponzu_qa_chain = ponzu_qa_template | model
 search_query_chain = model_with_search_tool
 
 def qa_bot(question: str) -> str:
-    result = search_query_chain.invoke(question)
-    print(result)
     tool_executor = ToolExecutor(tools)
-    for tool_call in result.tool_calls:
-        action = ToolInvocation(
-            tool=tool_call["name"],
-            tool_input=tool_call["args"]
-        )
+    action = ToolInvocation(
+        tool="penguin_vector_search",
+        tool_input={"query": question}
+    )
     response = tool_executor.invoke(action)
+    # TODO: 複数のレスポンスがある場合には、全て考慮してから、回答させる
     result = ponzu_qa_chain.invoke({"context": response.response, "question": question})
     return result.content
