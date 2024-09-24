@@ -165,3 +165,5 @@ node_modules/
 .serverless/
 gha-creds-*.json
 .env.yaml
+
+credential/*.json

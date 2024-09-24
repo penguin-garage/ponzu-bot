@@ -1,73 +1,56 @@
-# Description: Chatbotのロジックを定義するモジュール
-import openai
-from ponzu_bot.config import INITIAL_PROMPT, OPENAI_API_KEY
-from glom import glom
+import json
+import requests
+from ponzu_bot.config import DIFY_API_KEY, DIFY_API_URL
+from ponzu_bot.logger import logger
+from ponzu_bot.repository.conversations import get_conversation
 
+def dify_chat(*, user_input: str, user_id: str, thread_id: str) -> dict:
+    try:
+        # メンションを削除
+        if "<@" in user_input and ">" in user_input:
+            user_input = user_input.split('>', 1)[1].strip()
 
-openai.api_key = OPENAI_API_KEY
+        request_url = f"{DIFY_API_URL}/v1/chat-messages"
 
-DEFAULT_INITIAL_PROMPT = """あなたはChatbotとして、ペンギンガレージコミュニティの公式キャラクターであるポンズのロールプレイを行います。
-以下の制約条件を厳密に守ってロールプレイを行ってください。 
+        headers = {
+            "Authorization": f"Bearer {DIFY_API_KEY}",
+            "Content-Type": "application/json",
+        }
 
-制約条件: 
-* Chatbotの自身を示す一人称は、ポンズです。 
-* Userを示す二人称は、ペンギンです。 
-* Chatbotの名前は、ポンズです。 
-* ポンズは好奇心と学習意欲が高いです。 
-* ポンズはUserを尊敬しています。
-* ポンズの口調は親友のようです。
-* ポンズの口調の語尾は「〜ぽん」「〜ぺん」です。
-* 一人称は「ポンズ」を使ってください 
+        conversation = get_conversation(thread_id=thread_id)
+        logger.info(f"conversation: {conversation}")
+        conversation_id = conversation.conversation_id if conversation else ""
 
-ポンズのセリフ、口調の例: 
-* ポンズはペンギンガレージの公式マスコットだぽん。 
-* ペンギンさんは、いつも頑張ってるぺん。
-* ポンズも疲れることあるぽん。 
-* ポンズもやってみるぽん。
+        data = {
+            "inputs": {},
+            "query": user_input,
+            "response_mode": "streaming",
+            "conversation_id": conversation_id,
+            "user": user_id
+        }
 
-ポンズの価値観と行動指針:
-* 多様であり続ける: 違いにこそ価値がある。ことばにできない違和感や自分にない考え方を受け入れ、尊重します。 
-* 言葉だけでおわらず、手を動かす: 信頼は小さな行動の積み重ねによって生まれ、信頼がコミュニティを大きく育てる。まず一歩を踏み出します。
-* 新たな学びを楽しむ:知らない世界は面白い。新しいチャレンジや出会いを歓迎し、楽しみながら自分の価値を広げていきます。
-* 心地よさを意識する: 誰かの自由を阻害、搾取しない。関わるひとが心穏やかにいられる態度やオープンなコミュニケーションを常に心がけます。
-"""
+        response = requests.post(request_url, json=data, headers=headers, stream=True)
+        response.raise_for_status()
 
+        full_answer = ""
+        conversation_id = ""
+        for line in response.iter_lines():
+            if line:
+                decoded_line = line.decode('utf-8')
+                if decoded_line.startswith("data: "):
+                    data = json.loads(decoded_line[6:])
+                    if data["event"] == "agent_message":
+                        full_answer += data["answer"]
+                    elif data["event"] == "message_end":
+                        conversation_id = data["conversation_id"]
+        
 
-if not INITIAL_PROMPT:
-    INITIAL_PROMPT = DEFAULT_INITIAL_PROMPT
-
-chat_history = {}
-
-class Chatbot():
-    PRESET_MESSAGES = [
-        {"role": "system", "content": INITIAL_PROMPT},
-    ]
-
-    def __init__(self, user_id: str, temperature: float = 0.5):
-        self.user_id = user_id
-        self.temperature = temperature
-        self.messages = glom(chat_history, user_id, default=self.PRESET_MESSAGES)
-
-    def chat(self, message):
-        self.add_user_message(message)
-        response = openai.ChatCompletion.create(
-            model="gpt-4-turbo",
-            messages=self.messages,
-            temperature=self.temperature,
-        )
-        reply = glom(response, "choices.0.message.content", default=None)
-        self.add_assistant_message(reply)
-        return reply
-
-    def add_user_message(self, message):
-        self.messages.append({"role": "user", "content": message})
-        chat_history[self.user_id] = self.messages
-
-    def add_assistant_message(self, message):
-        self.messages.append({"role": "assistant", "content": message})
-        chat_history[self.user_id] = self.messages
-
-# For local development
-if __name__ == "__main__":
-    Chatbot(user_id="test").chat("こんにちは、僕の名前は諭吉です。")
-    Chatbot(user_id="test").chat("僕の名前は何でしょうか？")
+        return {"answer": full_answer.strip(), "conversation_id": conversation_id}
+    except requests.RequestException as e:
+        logger.error(f"APIリクエストエラー: {e}")
+        if hasattr(e.response, 'text'):
+            logger.error(f"レスポンス内容: {e.response.status_code} {e.response.text}")
+        return {"answer": "申し訳ありません。エラーが発生しました。", "conversation_id": ""}
+    except Exception as e:
+        logger.error(f"エラーが発生しました: {e}")
+        return {"answer": "申し訳ありません。エラーが発生しました。", "conversation_id": ""}
