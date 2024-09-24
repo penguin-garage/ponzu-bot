@@ -50,7 +50,7 @@ def dify_chat(*, user_input: str, user_id: str, thread_id: str) -> dict:
         logger.error(f"APIリクエストエラー: {e}")
         if hasattr(e.response, 'text'):
             logger.error(f"レスポンス内容: {e.response.status_code} {e.response.text}")
-        return {"answer": "申し訳ありません。エラーが発生しました。", "conversation_id": ""}
+        return {"answer": "ごめんなさいぽん。うまくお返事できないぽん。エラーが発生してるぺん。", "conversation_id": ""}
     except Exception as e:
         logger.error(f"エラーが発生しました: {e}")
-        return {"answer": "申し訳ありません。エラーが発生しました。", "conversation_id": ""}
+        return {"answer": "ごめんなさいぽん。うまくお返事できないぽん。エラーが発生してるぺん。", "conversation_id": ""}
